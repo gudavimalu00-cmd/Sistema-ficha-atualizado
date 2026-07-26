@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ficha - RPG</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #121214;
+            color: #e1e1e6;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: #202024;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #8257e5;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #a8a8b3;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #323238;
+            background-color: #121214;
+            color: #fff;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #8257e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:active {
+            background-color: #996ed5;
+        }
+        .resultado {
+            display: none;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px solid #323238;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .status-box {
+            background: #29292e;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid #8257e5;
+        }
+        .status-box .val {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #04d361;
+        }
+        .section-title {
+            color: #8257e5;
+            border-bottom: 1px solid #323238;
+            padding-bottom: 5px;
+            margin-top: 15px;
+        }
+        ul {
+            padding-left: 20px;
+            margin: 5px 0;
+        }
+        li {
+            margin-bottom: 4px;
+        }
+        .buff-text {
+            color: #04d361;
+        }
+        .debuff-text {
+            color: #f75a68;
+        }
+
+        /* Caixas Expansíveis */
+        details {
+            background-color: #29292e;
+            border: 1px solid #323238;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        summary {
+            font-weight: bold;
+            color: #04d361;
+            cursor: pointer;
+            outline: none;
+            user-select: none;
+        }
+        summary:hover {
+            color: #8257e5;
+        }
+        .details-content {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #c4c4cc;
+            border-top: 1px solid #323238;
+            padding-top: 8px;
+        }
+        .details-content p {
+            margin: 4px 0;
+        }
+
+        /* Área de Rolagem de Dados */
+        .dice-box {
+            background: #29292e;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #8257e5;
+            margin-top: 15px;
+        }
+        .dice-flex {
+            display: flex;
+            gap: 10px;
+        }
+        .dice-flex input {
+            flex: 1;
+        }
+        .dice-flex button {
+            width: auto;
+            margin-top: 0;
+            padding: 0 18px;
+        }
+        .dice-result {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #04d361;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚔️ Criador de Ficha</h1>
+    
+    <div class="form-group">
+        <label for="nome">Nome do Personagem:</label>
+        <input type="text" id="nome" placeholder="Ex: Eldrin">
+    </div>
+
+    <div class="form-group">
+        <label for="raca">Raça:</label>
+        <select id="raca">
+            <option value="">Selecione...</option>
+            <option value="1">Humano</option>
+            <option value="2">Elfo</option>
+            <option value="3">Ogro</option>
+            <option value="4">Gnomo</option>
+            <option value="5">Morto-Vivo</option>
+            <option value="6">Abissal</option>
+            <option value="7">Maldito</option>
+            <option value="8">Draconiano</option>
+            <option value="9">Silvestre Fauno</option>
+            <option value="10">Mecanóide</option>
+            <option value="11">Ratal</option>
+            <option value="12">Lumiar</option>
+            <option value="13">Exilado</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="classe">Classe:</label>
+        <select id="classe">
+            <option value="">Selecione...</option>
+            <option value="1">Guerreiro</option>
+            <option value="2">Arqueiro</option>
+            <option value="3">Ladino</option>
+            <option value="4">Paladino</option>
+            <option value="5">Caçador</option>
+            <option value="6">Curandeiro</option>
+            <option value="7">Torturador</option>
+            <option value="8">Alquimista</option>
+            <option value="9">Bárbaro</option>
+            <option value="10">Assassino</option>
+            <option value="11">Conjurador</option>
+            <option value="12">Mago</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="mutacao">Mutação:</label>
+        <select id="mutacao">
+            <option value="0">Nenhuma Mutação</option>
+            <option value="1">1 - Gigantismo</option>
+            <option value="2">2 - Ciclope</option>
+            <option value="3">3 - Baixa Estatura</option>
+            <option value="4">4 - Cegueira</option>
+            <option value="5">5 - Pele Escamosa</option>
+            <option value="6">6 - Braços Longos</option>
+            <option value="7">7 - Mãos de Garra</option>
+            <option value="8">8 - Corpo Esquelético</option>
+            <option value="9">9 - Corcunda</option>
+            <option value="10">10 - Mente Instável</option>
+        </select>
+    </div>
+
+    <button onclick="gerarFicha()">Calcular Ficha</button>
+
+    <div id="resultado" class="resultado">
+        <h2 style="text-align:center; margin-top:0;" id="out-nome"></h2>
+        
+        <h3 class="section-title">📊 Status de Sobrevivência</h3>
+        <div class="status-grid">
+            <div class="status-box">PV: <span class="val" id="out-pv"></span></div>
+            <div class="status-box">PE: <span class="val" id="out-pe"></span></div>
+            <div class="status-box">Movimento: <span class="val" id="out-mov"></span></div>
+            <div class="status-box">Defesa (CA): <span class="val" id="out-ca"></span></div>
+            <div class="status-box" style="grid-column: span 2;">Slots de Carga: <span class="val" id="out-carga"></span></div>
+        </div>
+
+        <h3 class="section-title">🎲 Atributos</h3>
+        <ul>
+            <li><b>Força:</b> d<span id="out-forca"></span></li>
+            <li><b>Agilidade:</b> d<span id="out-agilidade"></span></li>
+            <li><b>Vontade:</b> d<span id="out-vontade"></span></li>
+            <li><b>Intelecto:</b> d<span id="out-intelecto"></span></li>
+        </ul>
+
+        <div id="box-mutacao" style="display: none;">
+            <h3 class="section-title">🧬 Mutação: <span id="out-mutacao-nome"></span></h3>
+            <p><b class="buff-text">🟢 Benefício:</b> <span id="out-mutacao-buff"></span></p>
+            <p><b class="debuff-text">🔴 Penalidade:</b> <span id="out-mutacao-debuff"></span></p>
+        </div>
+
+        <h3 class="section-title">🗡️ Perícias Treinadas</h3>
+        <ul id="out-pericias"></ul>
+
+        <h3 class="section-title">✨ Habilidades & Itens</h3>
+        
+        <!-- Habilidade de Raça -->
+        <details>
+            <summary>🧬 Habilidade de Raça: <span id="out-raca-hab-nome"></span></summary>
+            <div class="details-content" id="out-raca-hab-detalhes"></div>
+        </details>
+
+        <!-- Habilidade de Classe -->
+        <details>
+            <summary>⚡ Habilidade de Classe: <span id="out-hab-nome"></span></summary>
+            <div class="details-content" id="out-hab-detalhes"></div>
+        </details>
+
+        <!-- Item Especial -->
+        <details>
+            <summary>🎒 Item Especial: <span id="out-item-nome"></span></summary>
+            <div class="details-content" id="out-item-detalhes"></div>
+        </details>
+
+        <!-- Rolador de Dados Customizado -->
+        <h3 class="section-title">🎲 Rolador de Dados Customizado</h3>
+        <div class="dice-box">
+            <label for="custom-dice">Digite a rolagem (ex: 2d34, d56, 3d6+2):</label>
+            <div class="dice-flex">
+                <input type="text" id="custom-dice" placeholder="Ex: 2d34">
+                <button onclick="rolarDadoCustomizado()">Rolar</button>
+            </div>
+            <div class="dice-result" id="out-dice-result"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const mutacoesDados = {
+    1: { nome: "Gigantismo", buff: "+2 PV Máximos e +1 de dano em ataques de Força", debuff: "-2 em testes de Furtividade e gasta 2 PE para Esquivar" },
+    2: { nome: "Ciclope", buff: "+2 de bônus no resultado final de ataques de Pontaria", debuff: "-2 de penalidade em testes de Iniciativa e Percepção" },
+    3: { nome: "Baixa Estatura", buff: "+1 na Classe de Armadura (CA) contra qualquer ataque", debuff: "Movimentação máxima reduzida em 2 metros" },
+    4: { nome: "Cegueira", buff: "Imune ao efeito 'Cego' por luz. Detecta qualquer som/cheiro a 5m", debuff: "Falha automática em testes de visão. Ataques à distância erram sempre" },
+    5: { nome: "Pele Escamosa", buff: "+1 de RD (Redução de Dano) natural e fixa", debuff: "Em climas frios, todas as ações custam +1 PE adicional" },
+    6: { nome: "Braços Longos", buff: "Ataca a até 3 metros (alcance) com armas corpo a corpo", debuff: "Dado de Agilidade cai 1 nível (ex: d8 para d6) para tarefas manuais" },
+    7: { nome: "Mãos de Garra", buff: "Ataques desarmados causam 1d6 de dano de corte", debuff: "Não consegue empunhar Arcos e Bestas" },
+    8: { nome: "Corpo Esquelético", buff: "+2 de bônus em testes de Furtividade e para escapar de agarres", debuff: "Fragilidade: Sempre que sofrer dano físico, perde +1 PV extra" },
+    9: { nome: "Corcunda", buff: "+2 PE Máximos", debuff: "Dado de Vontade cai 1 nível (ex: d8 para d6) em testes sociais" },
+    10: { nome: "Mente Instável", buff: "Uma vez por cena, pode rolar novamente um teste de Intelecto", debuff: "Se tirar '1' em teste de Vontade, perde sua próxima ação" }
+};
+
+const racasHabilidades = {
+    1: {
+        nome: "Resiliência Inabalável",
+        detalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Uma vez por turno, ao chegar a 0 PV, ficar Exausto ou falhar em um teste crucial, manifeste um segundo fôlego. Role <b>1d6+2</b> e recupere esse valor em PV ou PE.</p>`
+    },
+    2: {
+        nome: "Aprendizado Rápido",
+        detalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Uma vez por cena, você pode melhorar uma perícia: de d4 para d6 ou de d6 para d8.</p>`
+    },
+    3: {
+        nome: "Pele de Rocha",
+        detalhes: `<p><b>Efeito:</b> Possui RD natural de +2 (cumulativa). Pode empunhar armas pesadas de duas mãos usando apenas uma mão.</p>`
+    },
+    4: {
+        nome: "Rastejar pelas Sombras",
+        detalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Pode entrar em furtividade mesmo sendo observado (se houver sombra/cobertura). O próximo ataque recebe vantagem (rola 2d10 e pega o melhor) e ignora a CA do alvo (dano cheio).</p>`
+    },
+    5: {
+        nome: "Resistência à Morte",
+        detalhes: `<p><b>Custo:</b> 4 PE</p><p><b>Efeito:</b> Quando estiver com 0 PV, pode recuperar metade da Vida (uma vez por combate).</p>`
+    },
+    6: {
+        nome: "Sussurros do Vazio",
+        detalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Força um inimigo em alcance curto a ouvir vozes perturbadoras. O inimigo recebe <b>-2</b> no próximo teste de ataque ou defesa.</p>`
+    },
+    7: {
+        nome: "Língua de Serpente",
+        detalhes: `<p><b>Custo:</b> 1 PE (Opcional)</p><p><b>Efeito:</b> Recebe +2 em testes de Persuasão/Intimidação. Gastando 1 PE, causa Desvantagem (rola o dado menor) no próximo teste de Vontade do inimigo.</p>`
+    },
+    8: {
+        nome: "Sopro Residual",
+        detalhes: `<p><b>Custo:</b> 4 PE</p><p><b>Efeito:</b> Cuspa uma nuvem de fumaça/ácido em uma área de 3 metros, causando <b>1d10 de dano</b> a todos os atingidos.</p>`
+    },
+    9: {
+        nome: "Passo Leve",
+        detalhes: `<p><b>Efeito:</b> Ignora penalidades de terreno difícil e recebe +2 em Furtividade em ambientes naturais ou rurais.</p>`
+    },
+    10: {
+        nome: "Mente Analítica",
+        detalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Analisa um inimigo. Até o fim do combate, você e seus aliados recebem <b>+2</b> em todos os testes de ataque contra esse alvo.</p>`
+    },
+    11: {
+        nome: "Escorregadio",
+        detalhes: `<p><b>Custo:</b> 3 PE</p><p><b>Efeito:</b> Uma vez por turno, ao receber um ataque corporal, faça um teste de Agilidade contra o acerto do inimigo. Se vencer, desvia e ataca o inimigo ignorando a CA com dano fixo de +2.</p>`
+    },
+    12: {
+        nome: "Domínio Incandescente",
+        detalhes: `<p><b>Custo:</b> 5 PE</p><p><b>Efeito:</b> Foca seu brilho nos olhos de um adversário (teste de Vontade oposto).</p><p><b>Sucesso:</b> Assume o controle do corpo do alvo por 1 rodada.</p><p><b>Falha:</b> Recebe dano direto nos PV igual à diferença dos dados.</p>`
+    },
+    13: {
+        nome: "Vazio Mental",
+        detalhes: `<p><b>Custo:</b> 2 PE (Para transferência)</p><p><b>Efeito:</b> Imune a Medo/Hipnose. Pode gastar 2 PE para transferir uma condição negativa de um aliado para si mesmo.</p>`
+    }
+};
+
+const dadosClasses = {
+    1: {
+        habNome: "Ataque Pesado",
+        habDetalhes: `<p><b>Custo:</b> 3 PE</p><p><b>Efeito:</b> Adicione <b>+1d6</b> ao dano total da sua arma em ataques corpo a corpo.</p>`,
+        itemNome: "Espada de Aço (2 Slots)",
+        itemDetalhes: `<p>Lâmina maciça com adornos dourados.</p><p><b>Dano:</b> d8 + (Diferença do Acerto)</p>`
+    },
+    2: {
+        habNome: "Olhar Certeiro",
+        habDetalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Recebe <b>+3</b> em Pontaria por 1 rodada, sucesso auto em testes de visão e ignora escuridão.</p>`,
+        itemNome: "Arco Composto (2 Slots)",
+        itemDetalhes: `<p><b>Dano:</b> d8 + (Diferença do Acerto)</p><p><b>Propriedade:</b> Ignora 1 ponto de RD da armadura do alvo.</p>`
+    },
+    3: {
+        habNome: "Golpe Baixo",
+        habDetalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Dado de dano sobe um nível. Alvo fica <b>Atônito</b> (-2 nos testes até seu próximo turno).</p>`,
+        itemNome: "Par de Adagas de Vidro Negro (1 Slot cada)",
+        itemDetalhes: `<p><b>Dano:</b> d4 + (Diferença do Acerto)</p><p><b>Propriedade:</b> Atacar com as duas custa 3 PE, causando dano da 1ª + 2 de dano fixo da 2ª.</p>`
+    },
+    4: {
+        habNome: "Proteção Divina",
+        habDetalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Bloqueia para um aliado a até 2m e ganha <b>+2 RD extra</b> no bloqueio por 1 rodada.</p>`,
+        itemNome: "Maça Consagrada (3 Slots) e Escudo de Ferro (3 Slots)",
+        itemDetalhes: `<p><b>Dano (Maça):</b> d8 + (Diferença do Acerto) | Dano dobrado em mortos-vivos/sombras.</p><p><b>Escudo:</b> RD d8 | PV Armadura: 10.</p>`
+    },
+    5: {
+        habNome: "Armadilha de Abate",
+        habDetalhes: `<p><b>Custo:</b> 3 PE</p><p><b>Efeito:</b> Inimigo que entrar na área faz teste de Agilidade vs Sobrevivência. Falha: <b>1d10 dano</b> e Imobilizado.</p>`,
+        itemNome: "Machado de Mato (2 Slots) e 3 Armadilhas de Urso (2 Slots cada)",
+        itemDetalhes: `<p><b>Dano (Machado):</b> d8 + (Diferença do Acerto)</p><p><b>Armadilhas:</b> Usar com habilidade sobe o dano para 1d10.</p>`
+    },
+    6: {
+        habNome: "Corte Anatômico",
+        habDetalhes: `<p><b>Custo:</b> 3 PE</p><p><b>Efeito:</b> Ignora RD da armadura. Alvo sofre Hemorragia (perde 1d4 PV por turno).</p>`,
+        itemNome: "Cutelo de Campo (2 Slots) e Kit de Cauterização (3 Slots)",
+        itemDetalhes: `<p><b>Dano (Cutelo):</b> d8 + (Diferença do Acerto)</p><p><b>Medicina:</b> Cura 1d8+2 PV (5x por sessão).</p>`
+    },
+    7: {
+        habNome: "Ponto de Agonia",
+        habDetalhes: `<p><b>Custo:</b> 2 PE</p><p><b>Efeito:</b> Causa dano -3 e deixa o alvo Debilitado (dado de ataque cai 1 nível por 1 rodada).</p>`,
+        itemNome: "Ganchos de Presa (1 Slot)",
+        itemDetalhes: `<p><b>Dano:</b> d6 + (Diferença do Acerto) | Alcance: 3m</p><p><b>Derrubar (+1 PE):</b> Puxa inimigo e pode deixá-lo Caído.</p>`
+    },
+    8: {
+        habNome: "Catalisador Alquímico",
+        habDetalhes: `<p><b>Custo:</b> 3 PE + 1 Frasco</p><p><b>Efeito:</b> Bônus fixo de <b>+4</b> no frasco (+6 se tirar o valor máximo do dado).</p>`,
+        itemNome: "Bandoleira de Reagentes (3 Slots) e Besta de Mão (1 Slot)",
+        itemDetalhes: `<p>Estoque de 4 + max(dado Intelecto) frascos. Besta causa d6 + Dif Acerto.</p>`
+    },
+    9: {
+        habNome: "Fúria Sangrenta",
+        habDetalhes: `<p><b>Custo:</b> 3 PE</p><p><b>Efeito:</b> Por 2 rodadas: +4 dano fixo corpo a corpo e RD 3 física. Não pode Esquivar/Bloquear.</p>`,
+        itemNome: "Machado de Execução (4 Slots)",
+        itemDetalhes: `<p><b>Dano:</b> d12 + (Diferença do Acerto)</p><p><b>Propriedade:</b> Tirar 12 deixa o inimigo Atordoado.</p>`
+    },
+    10: {
+        habNome: "Golpe de Misericórdia",
+        habDetalhes: `<p><b>Custo:</b> 3 PE</p><p><b>Efeito:</b> Dano Dobrado contra inimigo que não agiu ou com menos de 50% PV. Recupera 2 PE se matar.</p>`,
+        itemNome: "Adaga Serrilhada (2 Slots) e Veneno Paralisante (1 Slot)",
+        itemDetalhes: `<p><b>Dano:</b> d6 + (Diferença do Acerto)</p><p><b>Veneno (1 PE):</b> -4 Iniciativa e -2 CA no alvo.</p>`
+    },
+    11: {
+        habNome: "Invocação Instável",
+        habDetalhes: `<p><b>Custo:</b> 4 PE</p><p><b>Efeito:</b> Invoca Aberração. Exige teste de Vontade a cada turno para não perder o controle.</p>`,
+        itemNome: "Cajado de Ossos (3 Slots)",
+        itemDetalhes: `<p><b>Dano:</b> d6 + (Diferença do Acerto)</p><p>Gasta 1 PE para a criatura proteger um aliado.</p>`
+    },
+    12: {
+        habNome: "Tecelão de Pactos",
+        habDetalhes: `<p>Magia acerta automaticamente sem testes de resistência do inimigo (paga custo de PV e PE).</p>`,
+        itemNome: "Pergaminhos Abissais (1 Slot cada) e Adaga de Sacrifício",
+        itemDetalhes: `<p>Carrega 3 pergaminhos. Adaga causa 1d4 de dano para cumprir pactos de sangue.</p>`
+    }
+};
+
+function gerarFicha() {
+    const nome = document.getElementById('nome').value || "Sem Nome";
+    const racaVal = parseInt(document.getElementById('raca').value);
+    const classeVal = parseInt(document.getElementById('classe').value);
+    const mutacaoVal = parseInt(document.getElementById('mutacao').value);
+
+    if (!racaVal || !classeVal) {
+        alert("Por favor, selecione a Raça e a Classe!");
+        return;
+    }
+
+    let forca = 0, agilidade = 0, vontad= 0, intelecto = 0;
+
+    switch(racaVal) {
+        case 1: forca=8; intelecto=8; vontade=6; agilidade=6; break;
+        case 2: forca=4; intelecto=10; vontade=6; agilidade=8; break;
+        case 3: forca=10; intelecto=4; vontade=8; agilidade=6; break;
+        case 4: forca=10; intelecto=6; vontade=4; agilidade=8; break;
+        case 5: forca=4; intelecto=6; vontade=8; agilidade=10; break;
+        case 6: forca=4; intelecto=8; vontade=10; agilidade=6; break;
+        case 7: forca=4; intelecto=10; vontade=8; agilidade=6; break;
+        case 8: forca=10; intelecto=4; vontade=8; agilidade=6; break;
+        case 9: forca=6; intelecto=4; vontade=8; agilidade=10; break;
+        case 10: forca=4; intelecto=10; vontade=8; agilidade=6; break;
+        case 11: forca=4; intelecto=8; vontade=6; agilidade=10; break;
+        case 12: forca=6; intelecto=8; vontade=10; agilidade=4; break;
+        case 13: forca=8; intelecto=4; vontade=10; agilidade=6; break;
+    }
+
+    let pericias = {
+        luta: 4, atletismo: 4, vigor: 4,
+        pontaria: 4, furtividade: 4, mao_leve: 4,
+        magia_negra: 4, medicina: 4, investigacao: 4,
+        vigilancia: 4, sobrevivencia: 4, persuasao: 4
+    };
+
+    switch(classeVal) {
+        case 1: pericias.luta=8; pericias.vigor=8; pericias.sobrevivencia=6; pericias.atletismo=6; break;
+        case 2: pericias.pontaria=8; pericias.sobrevivencia=8; pericias.vigilancia=6; pericias.furtividade=6; break;
+        case 3: pericias.mao_leve=8; pericias.furtividade=8; pericias.luta=6; pericias.investigacao=6; break;
+        case 4: pericias.magia_negra=8; pericias.vigor=8; pericias.luta=6; pericias.persuasao=6; break;
+        case 5: pericias.sobrevivencia=8; pericias.vigilancia=8; pericias.pontaria=6; pericias.investigacao=6; break;
+        case 6: pericias.medicina=8; pericias.luta=8; pericias.mao_leve=6; pericias.vigor=6; break;
+        case 7: pericias.persuasao=8; pericias.luta=8; pericias.medicina=6; pericias.investigacao=6; break;
+        case 8: pericias.pontaria=8; pericias.mao_leve=8; pericias.magia_negra=6; pericias.medicina=6; break;
+        case 9: pericias.luta=8; pericias.vigor=8; pericias.atletismo=6; pericias.sobrevivencia=6; break;
+        case 10: pericias.furtividade=8; pericias.luta=8; pericias.pontaria=6; pericias.vigilancia=6; break;
+        case 11: pericias.magia_negra=8; pericias.furtividade=8; pericias.vigilancia=6; pericias.atletismo=6; break;
+        case 12: pericias.magia_negra=8; pericias.investigacao=8; pericias.medicina=6; pericias.persuasao=6; break;
+    }
+
+    const maiorForcaVigor = Math.max(forca, pericias.vigor);
+    let pv = 20 + maiorForcaVigor;
+    let pe = pericias.vigor + 2;
+    let movimento = 4 + pericias.atletismo;
+    let ca = 5;
+    const cargaSlots = forca * 2;
+
+    const boxMutacao = document.getElementById('box-mutacao');
+    if (mutacaoVal > 0 && mutacoesDados[mutacaoVal]) {
+        const m = mutacoesDados[mutacaoVal];
+        if (mutacaoVal === 1) pv += 2;
+        if (mutacaoVal === 3) ca += 1;
+        if (mutacaoVal === 3) movimento -= 2;
+        if (mutacaoVal === 9) pe += 2;
+
+        document.getElementById('out-mutacao-nome').innerText = m.nome;
+        document.getElementById('out-mutacao-buff').innerText = m.buff;
+        document.getElementById('out-mutacao-debuff').innerText = m.debuff;
+        boxMutacao.style.display = 'block';
+    } else {
+        boxMutacao.style.display = 'none';
+    }
+
+    document.getElementById('out-nome').innerText = nome;
+    document.getElementById('out-pv').innerText = pv;
+    document.getElementById('out-pe').innerText = pe;
+    document.getElementById('out-mov').innerText = movimento + "m";
+    document.getElementById('out-ca').innerText = ca;
+    document.getElementById('out-carga').innerText = cargaSlots + " Slots";
+
+    document.getElementById('out-forca').innerText = forca;
+    document.getElementById('out-agilidade').innerText = agilidade;
+    document.getElementById('out-vontade').innerText = vontade;
+    document.getElementById('out-intelecto').innerText = intelecto;
+
+    // Preencher Habilidade de Raça
+    const rDados = racasHabilidades[racaVal];
+    if (rDados) {
+        document.getElementById('out-raca-hab-nome').innerText = rDados.nome;
+        document.getElementById('out-raca-hab-detalhes').innerHTML = rDados.detalhes;
+    }
+
+    // Preencher Habilidade e Item de Classe
+    const cDados = dadosClasses[classeVal];
+    if (cDados) {
+        document.getElementById('out-hab-nome').innerText = cDados.habNome;
+        document.getElementById('out-hab-detalhes').innerHTML = cDados.habDetalhes;
+        document.getElementById('out-item-nome').innerText = cDados.itemNome;
+        document.getElementById('out-item-detalhes').innerHTML = cDados.itemDetalhes;
+    }
+
+    const listaPericias = document.getElementById('out-pericias');
+    listaPericias.innerHTML = "";
+    for (let [pericia, val] of Object.entries(pericias)) {
+        if (val > 4) {
+            let li = document.createElement('li');
+            li.innerHTML = `<b>${pericia.toUpperCase().replace('_', ' ')}:</b> d${val}`;
+            listaPericias.appendChild(li);
+        }
+    }
+
+    document.getElementById('resultado').style.display = 'block';
+}
+
+function rolarDadoCustomizado() {
+    const input = document.getElementById('custom-dice').value.trim().toLowerCase();
+    const resBox = document.getElementById('out-dice-result');
+    
+    // Regex para identificar padrão tipo "2d34", "d56", "3d6+4", etc.
+    const regex = /^(\d*)d(\d+)(?:([+-])(\d+))?$/;
+    const match = input.match(regex);
+
+    if (!match) {
+        resBox.innerText = "Formato inválido! Use ex: 2d34, d56 ou 1d20+2";
+        resBox.style.color = "#f75a68";
+        return;
+    }
+
+    let qtd = parseInt(match[1]) || 1;
+    let lados = parseInt(match[2]);
+    let sinal = match[3];
+    let mod = parseInt(match[4]) || 0;
+
+    let resultados = [];
+    let total = 0;
+
+    for (let i = 0; i < qtd; i++) {
+        let roll = Math.floor(Math.random() * lados) + 1;
+        resultados.push(roll);
+        total += roll;
+    }
+
+    if (sinal === '+') total += mod;
+    if (sinal === '-') total -= mod;
+
+    let modTexto = mod ? ` ${sinal} ${mod}` : '';
+    resBox.innerText = `🎲 Resultados [${resultados.join(', ')}]${modTexto} = Total: ${total}`;
+    resBox.style.color = "#04d361";
+}
+</script>
+
+</body>
+</html>
